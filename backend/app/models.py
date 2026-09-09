@@ -1,14 +1,14 @@
 import uuid
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 
-from sqlalchemy import String, Integer, Boolean, Foreignkey, TIMESTAMP, Time, JSON
+from sqlalchemy import String, Integer, Boolean, ForeignKey, TIMESTAMP, Time, JSONB
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
 class Business(Base):
-	_tablename_ = "businesses"
+	__tablename__ = "businesses"
 	id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 	name: Mapped[str] = mapped_column(String, nullable=False)
 	phone: Mapped[str] = mapped_column(String, nullable=False)
@@ -17,16 +17,16 @@ class Business(Base):
 	timezone: Mapped[str] = mapped_column(String, default="Africa/Nairobi")
 	plan: Mapped[str] = mapped_column(String, default="free")
 	plan_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-	created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.now(datetime.timezone.utc))
+	reated_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 	services: Mapped[list["Service"]] = relationship(back_populates="business")
 	bookings: Mapped[list["Booking"]] = relationship(back_populates='business')
 
 class Service(Base):
-	_tablename_ = "services"
+	__tablename__ = "services"
 
 	id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-	business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), Foreignkey("businesses.id"))
+	business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("businesses.id"))
 	name: Mapped[str] = mapped_column(String, nullable=False)
 	duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
 	price_kes: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -36,7 +36,7 @@ class Service(Base):
 	business: Mapped["Business"] = relationship(back_populates="services")
 
 class AvailabilityRule(Base):
-	_tablename_ = "availability_rules"
+	__tablename__ = "availability_rules"
 
 	id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 	business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("businesses.id"))
@@ -46,13 +46,15 @@ class AvailabilityRule(Base):
 
 
 class Booking(Base):
-	_tablename_ = "bookings"
+	__tablename__ = "bookings"
 
 	id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-	business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), Foreignkey("businesses.id"))
-	service_id: Mapped[uuid.UUID] = mapped_column(UUID())
+	business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("businesses.id"))
+	service_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("services.id"), nullable=False)
 	customer_name: Mapped[str] = mapped_column(String, nullable=False)
 	customer_phone: Mapped[str] = mapped_column(String, nullable=False)
+	slot_start: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
+	slot_end: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
 	status: Mapped[str] = mapped_column(String, default="pending_payment")
 	hold_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 	mpesa_checkout_request_id: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -67,6 +69,6 @@ class PaymentEvent(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     booking_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("bookings.id"))
     event_type: Mapped[str] = mapped_column(String, nullable=False)
-    raw_payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.utcnow)
+    raw_payload: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
 
