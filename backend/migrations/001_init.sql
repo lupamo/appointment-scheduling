@@ -45,14 +45,20 @@ CREATE TABLE bookings (
 	hold_expires_at TIMESTAMPTZ,
 	mpesa_checkout_request_id TEXT,
 	mpesa_receipt_number TEXT,
-	created_at TIMESTAMPTZ now()
+	created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- prevents double booking at the same slot while payments
 
-CREATE UNIQUE INDEX idx_no_double_booking
-	ON bookings (business_id, slot_start)
-	WHERE status IN ('pending_payment', 'confirmed');
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+ALTER TABLE bookings ADD CONSTRAINT no_overlapping_bookings
+	EXCLUDE USING gist (
+		business_id WITH =,
+		tstzrange(slot_start, slot_end) WITH &&
+	)
+	WHERE (status IN ('pending_payment', 'confirmed'));
+
 
 CREATE TABLE payment_events (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -62,5 +68,11 @@ CREATE TABLE payment_events (
 	created_at TIMESTAMPTZ DEFAULT now()
 );
 
+
+CREATE INDEX idx_services_business_id ON services(business_id);
+CREATE INDEX idx_bookings_service_id ON bookings(service_id);
+CREATE INDEX idx_bookings_business_id ON bookings(business_id);
 CREATE INDEX idx_bookings_business_status ON bookings (business_id, status);
 CREATE INDEX idx_bookings_hold_expires ON bookings (hold_expires_at) WHERE status = 'pending_payment';
+CREATE INDEX idx_bookings_checkout_request ON bookings(mpesa_checkout_request_id);
+CREATE INDEX idx_payment_events_booking_id ON payment_events(booking_id);
