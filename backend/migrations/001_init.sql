@@ -40,11 +40,12 @@ CREATE TABLE bookings (
 	customer_phone TEXT NOT NULL,
 	slot_start TIMESTAMPTZ NOT NULL,
 	slot_end TIMESTAMPTZ NOT NULL,
-	status TEXT NOT NULL DEFAULT 'pending_payment'
+	status TEXT NOT NULL DEFAULT 'pending_payment',
 	-- pending payment | confirmed | expired | cancelled| no show --
 	hold_expires_at TIMESTAMPTZ,
 	mpesa_checkout_request_id TEXT,
 	mpesa_receipt_number TEXT,
+	rescheduled_from UUID REFERENCES bookings(id),
 	created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -76,3 +77,4 @@ CREATE INDEX idx_bookings_business_status ON bookings (business_id, status);
 CREATE INDEX idx_bookings_hold_expires ON bookings (hold_expires_at) WHERE status = 'pending_payment';
 CREATE INDEX idx_bookings_checkout_request ON bookings(mpesa_checkout_request_id);
 CREATE INDEX idx_payment_events_booking_id ON payment_events(booking_id);
+CREATE INDEX idx_bookings_rescheduled_from ON bookings(rescheduled_from) WHERE rescheduled_from IS NOT NULL;
