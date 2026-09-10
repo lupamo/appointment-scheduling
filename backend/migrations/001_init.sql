@@ -60,6 +60,16 @@ ALTER TABLE bookings ADD CONSTRAINT no_overlapping_bookings
 	)
 	WHERE (status IN ('pending_payment', 'confirmed'));
 
+ALTER TABLE businesses ADD COLUMN payout_method TEXT NOT NULL DEFAULT 'phone'
+	CHECK (payout_method IN ('shortcode', 'phone'));
+ALTER TABLE businesses AND COLUMN payout_phone TEXT;
+
+----- ENFORCE AT THE DB LEVEL EXACTLY ONE PAYOUT TARGET-----
+ALTER TABLE businesses ADD CONSTRAINT payout_target_required
+	CHECK (
+		(payout_method = 'shortcode' AND mpesa_shortcode IS NOT NULL)
+		OR (payout_method = 'phone' AND payout_method IS NOT NULL)
+	)
 
 CREATE TABLE payment_events (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

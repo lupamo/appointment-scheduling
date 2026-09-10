@@ -19,6 +19,9 @@ class Business(Base):
 	plan_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 	reated_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
 
+	payout_method: Mapped[str] = mapped_column(String, default="phone")
+	payout_phone: Mapped[str | None] = mapped_column(String, nullable=True)
+
 	services: Mapped[list["Service"]] = relationship(back_populates="business")
 	bookings: Mapped[list["Booking"]] = relationship(back_populates='business')
 
