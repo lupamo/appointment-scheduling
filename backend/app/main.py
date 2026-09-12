@@ -30,7 +30,8 @@ app.add_middleware(
 )
 
 app.include_router(businesses.router)
-
+app.include_router(services.router)
+app.include_router(bookings.router)
 
 @app.get("/health")
 async def health():

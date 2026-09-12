@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, time
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 class BusinessCreate(BaseModel):
 	name: str

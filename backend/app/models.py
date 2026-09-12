@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime, time, timezone
 
-from sqlalchemy import String, Integer, Boolean, ForeignKey, TIMESTAMP, Time, JSONB
+from sqlalchemy import String, Integer, Boolean, ForeignKey, TIMESTAMP, Time
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,7 +18,7 @@ class Business(Base):
 	timezone: Mapped[str] = mapped_column(String, default="Africa/Nairobi")
 	plan: Mapped[str] = mapped_column(String, default="free")
 	plan_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-	reated_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
+	created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 	payout_method: Mapped[str] = mapped_column(String, default="phone")
 	payout_phone: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -62,7 +63,7 @@ class Booking(Base):
 	hold_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 	mpesa_checkout_request_id: Mapped[str | None] = mapped_column(String, nullable=True)
 	mpesa_receipt_number: Mapped[str | None] = mapped_column(String, nullable=True)
-	created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=datetime.now(datetime.timezone.utc))
+	created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 	business: Mapped["Business"] = relationship(back_populates="bookings")
 

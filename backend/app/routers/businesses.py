@@ -12,7 +12,7 @@ router = APIRouter(prefix="/businesses", tags=["businesses"])
 async def create_business(payload: BusinessCreate, db:AsyncSession = Depends(get_db)):
 	existing = await db.scalar(select(Business).where(Business.slug == payload.slug))
 	if existing:
-		raise HTTPException(status_code=400, detail="Slug already takem")
+		raise HTTPException(status_code=400, detail="Slug already taken")
 
 	business = Business(**payload.model_dump())
 	db.add(business)
