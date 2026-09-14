@@ -59,7 +59,7 @@ async def mpesa_callback(request: Request):
                 )
             except Exception:
                 # Don't fail the webhook response over a WhatsApp send failure —
-                # log this properly once real logging is set up.
+                # log this properly once real logging is set up
                 pass
 
     return {"ResultCode": 0, "ResultDesc": "Accepted"}
