@@ -8,20 +8,24 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
+def utcnow() -> datetime:
+	"""passed as a callable to 'default=' so it runs per-row at insert time"""
+	return datetime.now(timezone.utc)
+
 class Business(Base):
 	__tablename__ = "businesses"
+
 	id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 	name: Mapped[str] = mapped_column(String, nullable=False)
 	phone: Mapped[str] = mapped_column(String, nullable=False)
 	slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 	mpesa_shortcode: Mapped[str | None] = mapped_column(String, nullable=True)
+	payout_method: Mapped[str] = mapped_column(String, default="phone")
+	payout_phone: Mapped[str | None] = mapped_column(String, nullable=True)
 	timezone: Mapped[str] = mapped_column(String, default="Africa/Nairobi")
 	plan: Mapped[str] = mapped_column(String, default="free")
 	plan_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 	created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
-
-	payout_method: Mapped[str] = mapped_column(String, default="phone")
-	payout_phone: Mapped[str | None] = mapped_column(String, nullable=True)
 
 	services: Mapped[list["Service"]] = relationship(back_populates="business")
 	bookings: Mapped[list["Booking"]] = relationship(back_populates='business')
@@ -63,7 +67,12 @@ class Booking(Base):
 	hold_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 	mpesa_checkout_request_id: Mapped[str | None] = mapped_column(String, nullable=True)
 	mpesa_receipt_number: Mapped[str | None] = mapped_column(String, nullable=True)
+	reschedule_from: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True)
+	refund_status: Mapped[str] = mapped_column(String, default="none")
+	refunded_amount: Mapped[int | None] = mapped_column(Integer, nullable=True)
+	refunded_at: Mapped[str] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 	created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc))
+
 
 	business: Mapped["Business"] = relationship(back_populates="bookings")
 

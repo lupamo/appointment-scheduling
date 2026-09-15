@@ -12,6 +12,8 @@ class BusinessCreate(BaseModel):
 
 	@model_validator(mode="after")
 	def check_payout_target(self):
+		if self.payout_method not in ("shortcode", "phone"):
+			raise ValueError("Payout_methid must be 'shortcode' or 'phone'")
 		if self.payout_method == "shortcode" and not self.mpesa_shortcode:
 			raise ValueError("mpesa_shortcode is required when payout method is shortcode")
 		if self.payout_method == "phone" and not self.payout_phone:
@@ -26,6 +28,7 @@ class BusinessOut(BaseModel):
 	payout_method: str
 	mpesa_shortcode: str | None = None
 	payout_phone: str | None = None
+	created_at: datetime
 
 	class Config:
 		from_attributes = True
@@ -52,6 +55,11 @@ class AvailabilityRuleCreate(BaseModel):
 	start_time: time
 	end_time: time
 
+class AvailabilityRuleOut(AvailabilityRuleCreate):
+	id: uuid.UUID
+	class Config:
+		from_attributes = True
+	
 # - Booking --------
 class BookingCreate(BaseModel):
 	service_id: uuid.UUID
@@ -73,4 +81,10 @@ class BookingOut(BaseModel):
 class BookingStatusOut(BaseModel):
 	id: uuid.UUID
 	status: str
+
+	class Config:
+		from_attribute = True
+
+class RescheduleRequest(BaseModel):
+	new_slot_start: datetime
 
