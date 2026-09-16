@@ -160,7 +160,7 @@ async def reschedule_booking(business_id: uuid.UUID, booking_id: uuid.UUID, payl
     new = Booking(
         business_id=business_id,
         service_id=old.service_id,
-        customer_name=old.customer_name
+        customer_name=old.customer_name,
         customer_phone=old.customer_phone,
         slot_start=payload.new_slot_start,
         slot_end=new_slot_end,
@@ -168,8 +168,8 @@ async def reschedule_booking(business_id: uuid.UUID, booking_id: uuid.UUID, payl
         mpesa_receipt_number=old.mpesa_receipt_number,
         reschedule_from=old.id,
         mpesa_receipt_number=old.mpesa_receipt_number,
-        rescheduled_from=old.id,
-    )
+        rescheduled_from=old.id
+        )
     db.add(new)
 
     try:
