@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models import Business, Service
-from app.schemas import ServiceCreate, ServiceOut
+from app.schema import ServiceCreate, ServiceOut
 
 router = APIRouter(prefix="/businesses/{business_id}/services", tags=["services"])
 

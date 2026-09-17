@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
 	database_url: str
 
-	daraja_Consumer_key: str = ""
+	daraja_consumer_key: str = ""
 	daraja_consumer_secret: str = ""
 	daraja_shortcode: str = ""
 	daraja_passkey: str = ""

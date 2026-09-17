@@ -167,7 +167,6 @@ async def reschedule_booking(business_id: uuid.UUID, booking_id: uuid.UUID, payl
         status="confirmed",
         mpesa_receipt_number=old.mpesa_receipt_number,
         reschedule_from=old.id,
-        mpesa_receipt_number=old.mpesa_receipt_number,
         rescheduled_from=old.id
         )
     db.add(new)

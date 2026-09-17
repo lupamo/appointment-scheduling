@@ -67,7 +67,7 @@ class Booking(Base):
 	hold_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 	mpesa_checkout_request_id: Mapped[str | None] = mapped_column(String, nullable=True)
 	mpesa_receipt_number: Mapped[str | None] = mapped_column(String, nullable=True)
-	reschedule_from: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True)
+	rescheduled_from: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True)
 	refund_status: Mapped[str] = mapped_column(String, default="none")
 	refunded_amount: Mapped[int | None] = mapped_column(Integer, nullable=True)
 	refunded_at: Mapped[str] = mapped_column(TIMESTAMP(timezone=True), nullable=True)

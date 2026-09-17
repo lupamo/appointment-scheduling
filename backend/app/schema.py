@@ -88,3 +88,5 @@ class BookingStatusOut(BaseModel):
 class RescheduleRequest(BaseModel):
 	new_slot_start: datetime
 
+class RefundRequest(BaseModel):
+	amount: int
