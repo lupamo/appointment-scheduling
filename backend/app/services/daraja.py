@@ -50,6 +50,11 @@ async def initiate_stk_push(*, phone: str, amount: int, account_reference: str, 
     token = await get_access_token()
     password, timestamp = _password_and_timestamp()
 
+    # Construct callback URL with security token
+    # The base URL should be like "https://your-domain.com/mpesa/callback"
+    # We append the webhook secret to it
+    callback_url = f"{settings.daraja_callback_url}/{settings.daraja_webhook_secret}"
+
     payload = {
         "BusinessShortCode": settings.daraja_shortcode,
         "Password": password,
@@ -59,7 +64,7 @@ async def initiate_stk_push(*, phone: str, amount: int, account_reference: str, 
         "PartyA": phone,
         "PartyB": settings.daraja_shortcode,
         "PhoneNumber": phone,
-        "CallBackURL": settings.daraja_callback_url,
+        "CallBackURL": callback_url,
         "AccountReference": account_reference,
         "TransactionDesc": description,
     }
@@ -97,4 +102,23 @@ async def query_stk_status(checkout_request_id: str) -> dict:
         )
         resp.raise_for_status()
         return resp.json()
+
+
+async def verify_transaction_success(checkout_request_id: str) -> bool:
+    """
+    Verify with Daraja that a transaction was actually successful.
+    This is used as a security check before processing webhook callbacks.
+    
+    Returns True if the transaction is confirmed successful, False otherwise.
+    """
+    try:
+        result = await query_stk_status(checkout_request_id)
+        result_code = result.get("ResultCode")
+        
+        # ResultCode 0 indicates successful transaction
+        return str(result_code) == "0"
+    except Exception:
+        # If we can't verify with Daraja, we should be conservative
+        # and not treat the transaction as successful
+        return False
 

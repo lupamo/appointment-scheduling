@@ -9,6 +9,9 @@ class Settings(BaseSettings):
 	daraja_passkey: str = ""
 	daraja_env: str = "sandbox"
 	daraja_callback_url: str = ""
+	daraja_webhook_secret: str = ""
+
+	daraja_allowed_ips: list[str] = ["196.201.214.0/24", "196.201.213.0/24"]
 
 	whatsapp_token: str = ""
 	whatsapp_phone_number_id: str = ""
