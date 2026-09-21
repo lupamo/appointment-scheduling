@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models import AvailabilityRule, Booking, Business, Service
-from app.schemas import AvailabilityRuleCreate, AvailabilityRuleOut
+from app.schema import AvailabilityRuleCreate, AvailabilityRuleOut
 
 router = APIRouter(prefix="/businesses/{business_id}", tags=["availability"])
 

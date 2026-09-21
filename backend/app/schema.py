@@ -51,7 +51,7 @@ class ServiceOut(ServiceCreate):
 
 #--Availability -----
 class AvailabilityRuleCreate(BaseModel):
-	days_of_week: int
+	day_of_week: int
 	start_time: time
 	end_time: time
 

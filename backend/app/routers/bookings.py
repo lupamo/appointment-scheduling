@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import get_db
 from app.models import Booking, Business, PaymentEvent, Service
-from app.schemas import (
+from app.schema import (
     BookingCreate,
     BookingOut,
     BookingStatusOut,
