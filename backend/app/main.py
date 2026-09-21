@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from app.jobs import expire_abandoned_holds
-from app.routers import businesses, services, bookings, mpesa
+from app.routers import businesses, services, bookings, mpesa, availability
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +42,7 @@ app.add_middleware(
 
 app.include_router(businesses.router)
 app.include_router(services.router)
+app.include_router(availability.router)
 app.include_router(bookings.router)
 app.include_router(mpesa.router)
 

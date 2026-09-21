@@ -83,6 +83,7 @@ CREATE TABLE payment_events (
 );
 
 CREATE INDEX idx_services_business_id ON services(business_id);
+CREATE INDEX idx_availability_rules_business_day ON availability_rules(business_id, day_of_week);
 CREATE INDEX idx_bookings_service_id ON bookings(service_id);
 CREATE INDEX idx_bookings_business_id ON bookings(business_id);
 CREATE INDEX idx_bookings_business_status ON bookings (business_id, status);
