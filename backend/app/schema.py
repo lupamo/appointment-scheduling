@@ -66,7 +66,6 @@ class BookingCreate(BaseModel):
 	customer_name: str
 	customer_phone: str
 	slot_start: datetime
-
 class BookingOut(BaseModel):
 	id: uuid.UUID
 	status: str
@@ -90,3 +89,4 @@ class RescheduleRequest(BaseModel):
 
 class RefundRequest(BaseModel):
 	amount: int
+
