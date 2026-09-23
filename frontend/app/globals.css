@@ -4,6 +4,7 @@
   --ring: 217 152 43;
   --modal-color: #f3f4f5;
   --btn-color: #fe5b3a;
+  --background-color: #ecedf1;
 }
 
 * {
@@ -11,7 +12,7 @@
 }
 
 body {
-  background: #ffffff;
+  background: var(--background-color);
   color: #000000;
 }
 .tabular {
