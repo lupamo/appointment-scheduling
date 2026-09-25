@@ -6,9 +6,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import require_business_owner
 from app.config import settings
 from app.database import get_db
 from app.models import Booking, Business, PaymentEvent, Service
+from app.routers.availability import is_within_business_hours
 from app.schema import (
     BookingCreate,
     BookingOut,
@@ -17,12 +19,9 @@ from app.schema import (
     RescheduleRequest,
 )
 from app.services import daraja
-from app.routers.availability import is_within_business_hours
 
 router = APIRouter(prefix="/businesses/{business_id}/bookings", tags=["bookings"])
 
-# Statuses that occupy a slot. Must match the WHERE clause on the
-# no_overlapping_bookings constraint in the migration.
 BLOCKING_STATUSES = ("pending_payment", "confirmed")
 
 
@@ -50,14 +49,10 @@ async def create_booking(
     if payload.slot_start <= datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Cannot book a slot in the past")
 
-    # Server computes slot_end — never trust the client for derivable data.
     slot_end = payload.slot_start + timedelta(minutes=service.duration_minutes)
 
     if not await is_within_business_hours(db, business_id, payload.slot_start, slot_end):
-        raise HTTPException(
-            status_code=400,
-            detail="That slot falls outside the business's operating hours",
-        )
+        raise HTTPException(status_code=400, detail="That slot falls outside the business's operating hours")
 
     hold_expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.booking_hold_minutes)
 
@@ -68,7 +63,7 @@ async def create_booking(
         customer_phone=payload.customer_phone,
         slot_start=payload.slot_start,
         slot_end=slot_end,
-        status="pending_payment",     # NOT confirmed — money hasn't arrived yet
+        status="pending_payment",
         hold_expires_at=hold_expires_at,
     )
     db.add(booking)
@@ -76,18 +71,11 @@ async def create_booking(
     try:
         await db.commit()
     except IntegrityError:
-        # The GIST exclusion constraint rejected this — the slot overlaps an
-        # existing pending_payment or confirmed booking. This is the race-safe
-        # path: we never checked availability in Python, we just tried.
         await db.rollback()
-        raise HTTPException(
-            status_code=409, detail="That slot overlaps an existing booking. Please pick another."
-        )
+        raise HTTPException(status_code=409, detail="That slot overlaps an existing booking. Please pick another.")
 
     await db.refresh(booking)
 
-    # Now ask Daraja to prompt the customer. If this fails the booking stays
-    # pending_payment and the cleanup job will expire it, freeing the slot.
     try:
         stk = await daraja.initiate_stk_push(
             phone=payload.customer_phone,
@@ -101,34 +89,22 @@ async def create_booking(
         await db.refresh(booking)
     except Exception as exc:
         db.add(PaymentEvent(
-            booking_id=booking.id,
-            event_type="stk_initiation_failed",
-            raw_payload={"error": str(exc)},
+            booking_id=booking.id, event_type="stk_initiation_failed", raw_payload={"error": str(exc)}
         ))
         await db.commit()
-        raise HTTPException(
-            status_code=502, detail="Could not initiate M-Pesa payment. Please try again."
-        )
+        raise HTTPException(status_code=502, detail="Could not initiate M-Pesa payment. Please try again.")
 
     return booking
 
 
 @router.get("/{booking_id}/status", response_model=BookingStatusOut)
-async def get_booking_status(
-    business_id: uuid.UUID, booking_id: uuid.UUID, db: AsyncSession = Depends(get_db)
-):
-    """Frontend polls this every 2-3s while showing 'check your phone'."""
+async def get_booking_status(business_id: uuid.UUID, booking_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Public — the booking's own UUID is effectively its access token for polling."""
     return await _load_booking(business_id, booking_id, db)
 
 
 @router.post("/{booking_id}/check-payment", response_model=BookingStatusOut)
-async def check_payment(
-    business_id: uuid.UUID, booking_id: uuid.UUID, db: AsyncSession = Depends(get_db)
-):
-    """
-    Fallback for a slow or lost webhook: actively ask Daraja what happened
-    rather than waiting to be told.
-    """
+async def check_payment(business_id: uuid.UUID, booking_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     booking = await _load_booking(business_id, booking_id, db)
 
     if booking.status != "pending_payment" or not booking.mpesa_checkout_request_id:
@@ -139,7 +115,6 @@ async def check_payment(
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Could not reach M-Pesa: {exc}")
 
-    # Daraja returns ResultCode as either str or int depending on endpoint.
     raw_code = result.get("ResultCode")
     code = str(raw_code) if raw_code is not None else None
 
@@ -155,8 +130,12 @@ async def check_payment(
 
 
 @router.get("", response_model=list[BookingOut])
-async def list_bookings(business_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    """Powers the owner dashboard. TODO: needs auth before production."""
+async def list_bookings(
+    business_id: uuid.UUID,
+    business: Business = Depends(require_business_owner),
+    db: AsyncSession = Depends(get_db),
+):
+    """Owner dashboard — requires proving ownership, since this returns customer names/phones."""
     result = await db.execute(
         select(Booking)
         .where(Booking.business_id == business_id, Booking.status.in_(["confirmed", "completed", "no_show"]))
@@ -170,38 +149,27 @@ async def reschedule_booking(
     business_id: uuid.UUID,
     booking_id: uuid.UUID,
     payload: RescheduleRequest,
+    business: Business = Depends(require_business_owner),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Moves a confirmed booking to a new slot, carrying the deposit over —
-    no second STK push. The old row becomes 'rescheduled' (which releases
-    its slot) and the new row is created already 'confirmed'.
-
-    Both changes happen in ONE transaction, so if the new slot collides
-    the whole thing rolls back and the customer keeps their original booking
-    rather than being left with nothing.
-    """
     old = await _load_booking(business_id, booking_id, db)
 
     if old.status != "confirmed":
         raise HTTPException(status_code=400, detail="Only confirmed bookings can be rescheduled")
 
-    # 24h rule lives here, not in the DB: CHECK constraints must be immutable
-    # and this depends on the current time.
     notice = timedelta(hours=settings.min_reschedule_notice_hours)
     if old.slot_start - datetime.now(timezone.utc) < notice:
         raise HTTPException(
             status_code=400,
             detail=f"Rescheduling requires at least {settings.min_reschedule_notice_hours} hours' notice",
         )
-
     if payload.new_slot_start <= datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Cannot reschedule into the past")
 
     service = await db.get(Service, old.service_id)
     new_slot_end = payload.new_slot_start + timedelta(minutes=service.duration_minutes)
 
-    old.status = "rescheduled"        # releases the old slot
+    old.status = "rescheduled"
 
     new = Booking(
         business_id=business_id,
@@ -210,8 +178,8 @@ async def reschedule_booking(
         customer_phone=old.customer_phone,
         slot_start=payload.new_slot_start,
         slot_end=new_slot_end,
-        status="confirmed",                              # deposit already paid
-        mpesa_receipt_number=old.mpesa_receipt_number,   # audit trail to original payment
+        status="confirmed",
+        mpesa_receipt_number=old.mpesa_receipt_number,
         rescheduled_from=old.id,
     )
     db.add(new)
@@ -220,9 +188,7 @@ async def reschedule_booking(
         await db.commit()
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(
-            status_code=409, detail="That new slot is unavailable. Please pick another."
-        )
+        raise HTTPException(status_code=409, detail="That new slot is unavailable. Please pick another.")
 
     await db.refresh(new)
     return new
@@ -230,7 +196,10 @@ async def reschedule_booking(
 
 @router.post("/{booking_id}/mark-completed", response_model=BookingOut)
 async def mark_completed(
-    business_id: uuid.UUID, booking_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+    business_id: uuid.UUID,
+    booking_id: uuid.UUID,
+    business: Business = Depends(require_business_owner),
+    db: AsyncSession = Depends(get_db),
 ):
     booking = await _load_booking(business_id, booking_id, db)
     booking.status = "completed"
@@ -241,9 +210,11 @@ async def mark_completed(
 
 @router.post("/{booking_id}/mark-no-show", response_model=BookingOut)
 async def mark_no_show(
-    business_id: uuid.UUID, booking_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+    business_id: uuid.UUID,
+    booking_id: uuid.UUID,
+    business: Business = Depends(require_business_owner),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Deposit is kept — that's the whole point of the product."""
     booking = await _load_booking(business_id, booking_id, db)
     booking.status = "no_show"
     await db.commit()
@@ -256,13 +227,9 @@ async def mark_refunded(
     business_id: uuid.UUID,
     booking_id: uuid.UUID,
     payload: RefundRequest,
+    business: Business = Depends(require_business_owner),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    RECORD-KEEPING ONLY. The owner sends the M-Pesa refund manually; this
-    just logs it. Becomes a real B2C Daraja call when AUTO_REFUNDS ships
-    as a paid feature.
-    """
     booking = await _load_booking(business_id, booking_id, db)
     booking.status = "cancelled"
     booking.refund_status = "completed"
