@@ -1,7 +1,37 @@
 import uuid
 from datetime import datetime, time
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, EmailStr
 
+
+# -----Auth-----------
+class SignupRequest(BaseModel):
+	email: EmailStr
+	password: str
+
+	@model_validator(mode="after")
+	def check_password_length(self):
+		if len(self.password) < 8:
+			raise ValueError("password must be atleast 8 characters")
+		return self
+
+class LoginRequester(BaseModel):
+	email: EmailStr
+	password: str
+
+class TokenOut(BaseModel):
+	access_token: str
+	token_type: str = "bearer"
+
+class OwnweOut(BaseModel):
+	id: uuid.UUID
+	email: str
+	created_at: datetime
+
+	class Config:
+		from_attributes = True
+
+
+#-----Business--------------
 class BusinessCreate(BaseModel):
 	name: str
 	phone: str
@@ -32,6 +62,16 @@ class BusinessOut(BaseModel):
 
 	class Config:
 		from_attributes = True
+
+class BusinessPublicOut(BaseModel):
+	"""What the public pag gets no payout info, no ownerid"""
+	id: uuid.UUID
+	name: str
+	slug: str
+
+	class Config: 
+		from_attributes = True
+
 
 
 # -- Services ---

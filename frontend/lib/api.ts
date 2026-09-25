@@ -76,7 +76,7 @@ export const api = {
 		payout_method: "phone" | "shortcode";
 		payout_phone?: string;
 		mpesa_shortcode?: string;
-	}) => request<Business>("/business", { method: "POST", body: JSON.stringify(payload)}),
+	}) => request<Business>("/businesses", { method: "POST", body: JSON.stringify(payload)}),
 	getBusinessSlug: (slug: string) => request<Business>(`/businesses/${slug}`),
 
 	//---- Services ---

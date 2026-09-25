@@ -5,11 +5,11 @@ import { AvailabilityRule, Business, Service } from "@/lib/api";
 import { Step, STEPS } from "../_lib/types";
 import { StepNav } from "./StepNav";
 import { BusinessStep } from "./BusinessStep";
-// import { ServicesStep } from "./ServicesStep";
-// import { HoursStep } from "./HoursStep";
-// import { ShareStep } from "./ShareStep";
+import { ServicesStep } from "./ServicesStep";
+import { HoursStep } from "./HoursStep";
+import { ShareStep } from "./ShareStep";
 
-export function OnboardingWizard() {
+export function OnboardWizard() {
 	const [step, setStep] = useState<Step>("business");
 	const [completed, setCompleted] = useState<Set<Step>>(new Set())
 	const [business, setBusiness] = useState<Business | null>(null);

@@ -43,7 +43,7 @@ export function BusinessStep({ onDone }: {onDone: (b: Business) => void}) {
 	return (
 		<form onSubmit={submit}>
 			<h1 className="text-2xl mb-1">Tell us about your business</h1>
-			<p className="text-[#fd5b3b]" text-sm mb-8>
+			<p className="text-[#fd5b3b] text-sm mb-8">
 				This becomes your public booking page.
 			</p>
 			<Field label="Business name">

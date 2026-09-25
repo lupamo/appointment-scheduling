@@ -12,10 +12,21 @@ def utcnow() -> datetime:
 	"""passed as a callable to 'default=' so it runs per-row at insert time"""
 	return datetime.now(timezone.utc)
 
+
+# ---- owner --------
+class Owner(Base):
+	__tablename__ = "owners"
+
+	id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+	email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+	password_hash: Mapped[str] = mapped_column(String, nullable=False)
+	created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=utcnow)
+	businesses: Mapped[list["Business"]] = relationship(back_populates="owner")
 class Business(Base):
 	__tablename__ = "businesses"
 
 	id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+	owner_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("owners.id"), nullable=True)
 	name: Mapped[str] = mapped_column(String, nullable=False)
 	phone: Mapped[str] = mapped_column(String, nullable=False)
 	slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
