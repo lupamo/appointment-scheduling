@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models import Business
+from app.models import Business, Owner
 from app.schema import BusinessCreate, BusinessOut
 
 router = APIRouter(prefix="/businesses", tags=["businesses"])
@@ -27,6 +27,12 @@ async def create_business(payload: BusinessCreate, db:AsyncSession = Depends(get
 	
 	await db.refresh(business)
 	return business
+
+@router.get("/mine", response_model=list[BusinessOut])
+async def list_my_business(owner: Owner = Depends(get_current_owner), db: AsyncSession = Depends(get_db)):
+	result = await db.execute(select(Business).where(Business.owner == owner.id))
+	return result.scalars().all()
+
 
 @router.get("/{slug}", response_model=BusinessOut)
 async def get_business_by_slug(slug: str, db: AsyncSession = Depends(get_db)):

@@ -1,6 +1,6 @@
 import React from "react";
 
-export function Field({label,children,} : {label: string; children: React.ReactNode;}) {
+export function Field({label, children} : {label: string; children: React.ReactNode;}) {
 	return (
 		<label className="block mb-5">
 			<span className="block text-sm text-[#393d49]">{label}</span>

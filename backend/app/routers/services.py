@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import require_business_owner
 from app.database import get_db
 from app.models import Business, Service
 from app.schema import ServiceCreate, ServiceOut
@@ -18,21 +19,12 @@ router = APIRouter(prefix="/businesses/{business_id}/services", tags=["services"
 
 
 @router.post("", response_model=ServiceOut, status_code=201)
-async def create_service(
-    business_id: uuid.UUID, payload: ServiceCreate, db: AsyncSession = Depends(get_db)
-):
-    # Check the business exists first so the client gets a clean 404
-    # instead of a raw foreign-key violation from Postgres.
-    business = await db.get(Business, business_id)
-    if not business:
-        raise HTTPException(status_code=404, detail="Business not found")
-
+async def create_service(business_id: uuid.UUID, payload: ServiceCreate, business: Business = Depends(require_business_owner),db: AsyncSession = Depends(get_db),):
     if payload.duration_minutes <= 0:
         raise HTTPException(status_code=400, detail="duration_minutes must be positive")
     if payload.deposit_kes > payload.price_kes:
-        raise HTTPException(status_code=400, detail="deposit cannot exceed price")
-
-    service = Service(business_id=business_id, **payload.model_dump())
+        raise HTTPException(status_code=400, detail="deposite cannot exceed price")
+    service = Service(business_id=business.id, **payload.model_dump())
     db.add(service)
     await db.commit()
     await db.refresh(service)
@@ -49,7 +41,7 @@ async def list_services(business_id: uuid.UUID, db: AsyncSession = Depends(get_d
 
 @router.delete("/{service_id}", status_code=204)
 async def deactivate_service(
-    business_id: uuid.UUID, service_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+    business_id: uuid.UUID, service_id: uuid.UUID, business: Business = Depends(require_business_owner), db: AsyncSession = Depends(get_db)
 ):
     """Soft delete — existing bookings still reference this service."""
     service = await db.get(Service, service_id)
