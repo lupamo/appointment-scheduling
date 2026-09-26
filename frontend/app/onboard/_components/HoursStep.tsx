@@ -63,26 +63,26 @@ export function HoursStep({
 
   return (
     <div>
-      <h1 className="text-2xl mb-1">When are you open?</h1>
-      <p className="text-white/50 text-sm mb-8">
+      <h1 className="text-2xl mb-1 text-white">When are you open?</h1>
+      <p className="text-gray-400 text-sm mb-8">
         Customers can only book within these hours.
       </p>
 
       {rules.length > 0 && (
-        <ul className="mb-8 divide-y hairline border hairline rounded-sm overflow-hidden">
+        <ul className="mb-8 divide-y border border-gray-700 rounded-sm overflow-hidden">
           {rules
             .slice()
             .sort((a, b) => a.day_of_week - b.day_of_week)
             .map((r) => (
               <li key={r.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span>{DAY_LABELS_FULL[r.day_of_week]}</span>
+                <span className="text-white">{DAY_LABELS_FULL[r.day_of_week]}</span>
                 <span className="flex items-center gap-3">
-                  <span className="text-white/50 tabular">
+                  <span className="text-gray-400 tabular">
                     {r.start_time.slice(0, 5)}–{r.end_time.slice(0, 5)}
                   </span>
                   <button
                     onClick={() => removeRule(r.id)}
-                    className="text-white/40 hover:text-alert text-xs"
+                    className="text-gray-500 hover:text-red-400 text-xs"
                     aria-label={`Remove ${DAY_LABELS_FULL[r.day_of_week]} hours`}
                   >
                     Remove
@@ -93,16 +93,16 @@ export function HoursStep({
         </ul>
       )}
 
-      <form onSubmit={addHours} className="border hairline rounded-sm p-5 mb-6">
-        <span className="block text-sm text-white/60 mb-2">Days</span>
+      <form onSubmit={addHours} className="border border-gray-700 rounded-sm p-5 mb-6">
+        <span className="block text-sm text-gray-300 mb-2">Days</span>
         <div className="flex flex-wrap gap-2 mb-5">
           {DAY_LABELS_FULL.map((label, i) => (
             <button
               type="button"
               key={i}
               onClick={() => toggleDay(i)}
-              className={`px-3 py-1.5 rounded-sm text-sm border hairline transition ${
-                selectedDays.has(i) ? "bg-accent text-accent-ink border-accent" : "text-white/70"
+              className={`px-3 py-1.5 rounded-sm text-sm border transition ${
+                selectedDays.has(i) ? "bg-orange-500 text-black border-orange-500" : "text-gray-300 border-gray-600"
               }`}
             >
               {label.slice(0, 3)}
@@ -129,11 +129,11 @@ export function HoursStep({
             />
           </Field>
         </div>
-        {error && <p className="text-alert text-sm mb-3">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="border hairline text-white px-4 py-2 rounded-sm text-sm hover:border-accent transition disabled:opacity-50"
+          className="border border-gray-600 text-white px-4 py-2 rounded-sm text-sm hover:border-orange-500 transition disabled:opacity-50"
         >
           {loading ? "Saving…" : "Add hours"}
         </button>
@@ -142,7 +142,7 @@ export function HoursStep({
       <button
         onClick={onDone}
         disabled={rules.length === 0}
-        className="bg-accent text-accent-ink font-medium px-5 py-2.5 rounded-sm hover:brightness-110 transition disabled:opacity-30"
+        className="bg-orange-500 text-black font-medium px-5 py-2.5 rounded-sm hover:bg-orange-600 transition disabled:opacity-30"
       >
         Continue
       </button>

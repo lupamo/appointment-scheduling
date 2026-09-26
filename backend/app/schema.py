@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, time
+from typing import Optional
 from pydantic import BaseModel, model_validator, EmailStr
 
 
@@ -37,8 +38,8 @@ class BusinessCreate(BaseModel):
 	phone: str
 	slug: str
 	payout_method: str = "phone"
-	mpesa_shortcode: str | None = None
-	payout_phone: str | None = None
+	mpesa_shortcode: Optional[str] = None
+	payout_phone: Optional[str] = None
 
 	@model_validator(mode="after")
 	def check_payout_target(self):
@@ -56,8 +57,8 @@ class BusinessOut(BaseModel):
 	slug: str
 	plan: str
 	payout_method: str
-	mpesa_shortcode: str | None = None
-	payout_phone: str | None = None
+	mpesa_shortcode: Optional[str] = None
+	payout_phone: Optional[str] = None
 	created_at: datetime
 
 	class Config:
@@ -112,7 +113,7 @@ class BookingOut(BaseModel):
 	slot_start: datetime
 	slot_end: datetime
 	customer_name: str
-	mpesa_receipt_number: str | None = None
+	mpesa_receipt_number: Optional[str] = None
 
 	class Config:
 		from_attributes = True

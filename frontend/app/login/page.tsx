@@ -7,7 +7,7 @@ import { api, ApiError } from "@/lib/api";
 import { setToken } from "@/lib/auth";
 import { Field, inputClass } from "@/components/Field";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,9 +19,18 @@ export default function SignupPage() {
     setError(null);
     setLoading(true);
     try {
-      const { access_token } = await api.signup(email, password);
+      const { access_token } = await api.login(email, password);
       setToken(access_token);
-      router.push("/onboard");
+
+      // Check if user already has businesses
+      const businesses = await api.listMyBusinesses();
+      if (businesses.length > 0) {
+        // Redirect to dashboard if they have businesses
+        router.push(`/dashboard/${businesses[0].id}`);
+      } else {
+        // Redirect to onboarding if they don't have businesses
+        router.push("/onboard");
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Something went wrong. Try again.");
     } finally {
@@ -32,9 +41,9 @@ export default function SignupPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
       <form onSubmit={submit} className="max-w-sm w-full">
-        <h1 className="text-2xl mb-1">Create your account</h1>
-        <p className="text-white/50 text-sm mb-8">
-          Set up your business booking page in a few minutes.
+        <h1 className="text-2xl mb-1 text-white">Log in to your account</h1>
+        <p className="text-gray-400 text-sm mb-8">
+          Welcome back to your business booking page.
         </p>
 
         <Field label="Email">
@@ -53,26 +62,24 @@ export default function SignupPage() {
             className={inputClass}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            minLength={8}
             required
           />
         </Field>
-        <p className="text-white/30 text-xs -mt-4 mb-5">At least 8 characters.</p>
 
-        {error && <p className="text-alert text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-accent text-accent-ink font-medium py-3 rounded-sm hover:brightness-110 transition disabled:opacity-50"
+          className="w-full bg-orange-500 text-black font-medium py-3 rounded-sm hover:bg-orange-600 transition disabled:opacity-50"
         >
-          {loading ? "Creating account…" : "Create account"}
+          {loading ? "Logging in…" : "Log in"}
         </button>
 
-        <p className="text-white/40 text-sm text-center mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="text-accent">
-            Log in
+        <p className="text-gray-400 text-sm text-center mt-6">
+          Don&apos;t have an account?{" "}
+          <Link href="/sign_up" className="text-orange-500 hover:text-orange-400">
+            Sign up
           </Link>
         </p>
       </form>

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from app.jobs import expire_abandoned_holds
-from app.routers import businesses, services, bookings, mpesa, availability
+from app.routers import businesses, services, bookings, mpesa, availability, auth
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,6 +40,7 @@ app.add_middleware(
 	allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(businesses.router)
 app.include_router(services.router)
 app.include_router(availability.router)

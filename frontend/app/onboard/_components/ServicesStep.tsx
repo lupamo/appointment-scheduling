@@ -46,17 +46,17 @@ export function ServicesStep({
 
   return (
     <div>
-      <h1 className="text-2xl mb-1">What do you offer?</h1>
-      <p className="text-white/50 text-sm mb-8">
+      <h1 className="text-2xl mb-1 text-white">What do you offer?</h1>
+      <p className="text-gray-400 text-sm mb-8">
         Add each service with its price and the deposit needed to hold a slot.
       </p>
 
       {services.length > 0 && (
-        <ul className="mb-8 divide-y hairline border hairline rounded-sm overflow-hidden">
+        <ul className="mb-8 divide-y border border-gray-700 rounded-sm overflow-hidden">
           {services.map((s) => (
             <li key={s.id} className="flex items-center justify-between px-4 py-3 text-sm">
-              <span>{s.name}</span>
-              <span className="text-white/50 tabular">
+              <span className="text-white">{s.name}</span>
+              <span className="text-gray-400 tabular">
                 {s.duration_minutes} min · KES {s.price_kes} · deposit KES {s.deposit_kes}
               </span>
             </li>
@@ -64,7 +64,7 @@ export function ServicesStep({
         </ul>
       )}
 
-      <form onSubmit={addService} className="border hairline rounded-sm p-5 mb-6">
+      <form onSubmit={addService} className="border border-gray-700 rounded-sm p-5 mb-6">
         <Field label="Service name">
           <input
             className={inputClass}
@@ -106,11 +106,11 @@ export function ServicesStep({
             />
           </Field>
         </div>
-        {error && <p className="text-alert text-sm mb-3">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="border hairline px-4 py-2 rounded-sm text-sm hover:border-accent transition disabled:opacity-50"
+          className="border border-gray-600 px-4 py-2 rounded-sm text-sm hover:border-orange-500 transition disabled:opacity-50"
         >
           {loading ? "Adding…" : "Add service"}
         </button>
@@ -119,7 +119,7 @@ export function ServicesStep({
       <button
         onClick={onDone}
         disabled={services.length === 0}
-        className="bg-accent text-accent-ink font-medium px-5 py-2.5 rounded-sm hover:brightness-110 transition disabled:opacity-30"
+        className="bg-orange-500 text-black font-medium px-5 py-2.5 rounded-sm hover:bg-orange-600 transition disabled:opacity-30"
       >
         Continue
       </button>

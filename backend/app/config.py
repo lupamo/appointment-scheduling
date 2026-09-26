@@ -19,6 +19,12 @@ class Settings(BaseSettings):
 	booking_hold_minutes: int = 3
 	app_base_url: str = "https://localhost:8000"
 
+	jwt_secret_key: str = "your-secret-key-change-in-production"
+	jwt_algorithm: str = "HS256"
+	jwt_expire_minutes: int = 60 * 24 * 7  # 7 days
+
+	min_reschedule_notice_hours: int = 24
+
 	class Config:
 		env_file = ".env"
 

@@ -122,8 +122,23 @@ export const api = {
 
   listMyBusinesses: () => request<Business[]>("/businesses/mine"),
 
+  updateBusiness: (
+    businessId: string,
+    payload: {
+      name: string;
+      phone: string;
+      slug: string;
+      payout_method: "phone" | "shortcode";
+      payout_phone?: string;
+      mpesa_shortcode?: string;
+    }
+  ) => request<Business>(`/businesses/${businessId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }),
+
   // --- Business (public) ---
-  getBusinessBySlug: (slug: string) => request<BusinessPublic>(`/businesses/${slug}`),
+  getBusinessBySlug: (slug: string) => request<Business>(`/businesses/${slug}`),
 
   // --- Services ---
   createService: (
@@ -136,6 +151,9 @@ export const api = {
     }),
 
   listServices: (businessId: string) => request<Service[]>(`/businesses/${businessId}/services`),
+
+  deleteService: (businessId: string, serviceId: string) =>
+    request<void>(`/businesses/${businessId}/services/${serviceId}`, { method: "DELETE" }),
 
   // --- Availability rules (owner mutates, public reads) ---
   createAvailabilityRule: (

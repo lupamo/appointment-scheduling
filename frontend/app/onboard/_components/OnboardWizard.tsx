@@ -1,5 +1,5 @@
 "use client";
- 
+
 import { useState } from "react";
 import { AvailabilityRule, Business, Service } from "@/lib/api";
 import { Step, STEPS } from "../_lib/types";
@@ -22,23 +22,25 @@ export function OnboardWizard() {
 		const currentIdx = STEPS.findIndex((x) => x.key === step);
 		if (idx <= currentIdx || completed.has(STEPS[idx - 1]?.key)) setStep(s);
 	};
-	
+
 	const finishStep = (s: Step, next: Step) => {
 		setCompleted((prev) => new Set(prev).add(s));
 		setStep(next);
 	};
 
+	const handleBusinessCreated = (b: Business) => {
+		setBusiness(b);
+		finishStep("business", "services");
+	};
+
 	return (
 		<main className="min-h-screen px-6 py-10 md:py-16">
 			<div className="max-w-3xl mx-auto md:flex md:gap-16">
-				<StepNav step={step} completed={completed} on Navigate={goTo} />
+				<StepNav step={step} completed={completed} onNavigate={goTo} />
 				<div className="flex-1 min-w-0">
 					{step === "business" && (
-						<BusinessStep 
-							onDone={(b) => {
-								setBusiness(b);
-								finishStep("business", "services")
-							}}
+						<BusinessStep
+							onDone={handleBusinessCreated}
 						/>
 					)}
 					{step === "services" && business && (

@@ -133,6 +133,7 @@ async def get_availability(
     on_date: date = Query(..., alias="date", description="YYYY-MM-DD"),
     db: AsyncSession = Depends(get_db),
 ):
+    # Public endpoint - no authentication required
     business = await db.get(Business, business_id)
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")

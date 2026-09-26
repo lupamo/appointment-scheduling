@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, time, timezone
+from typing import Optional
 
 from sqlalchemy import String, Integer, Boolean, ForeignKey, TIMESTAMP, Time
 from sqlalchemy.dialects.postgresql import UUID, JSONB
@@ -27,16 +28,16 @@ class Business(Base):
     __tablename__ = "businesses"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    owner_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("owners.id"), nullable=True)
+    owner_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), ForeignKey("owners.id"), nullable=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)
     slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    mpesa_shortcode: Mapped[str | None] = mapped_column(String, nullable=True)
+    mpesa_shortcode: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     payout_method: Mapped[str] = mapped_column(String, default="phone")
-    payout_phone: Mapped[str | None] = mapped_column(String, nullable=True)
+    payout_phone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     timezone: Mapped[str] = mapped_column(String, default="Africa/Nairobi")
     plan: Mapped[str] = mapped_column(String, default="free")
-    plan_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    plan_expires_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=utcnow)
 
     owner: Mapped["Owner"] = relationship(back_populates="businesses")
@@ -79,15 +80,15 @@ class Booking(Base):
     slot_start: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     slot_end: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(String, default="pending_payment")
-    hold_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    mpesa_checkout_request_id: Mapped[str | None] = mapped_column(String, nullable=True)
-    mpesa_receipt_number: Mapped[str | None] = mapped_column(String, nullable=True)
-    rescheduled_from: Mapped[uuid.UUID | None] = mapped_column(
+    hold_expires_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    mpesa_checkout_request_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    mpesa_receipt_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    rescheduled_from: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True
     )
     refund_status: Mapped[str] = mapped_column(String, default="none")
-    refunded_amount: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    refunded_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    refunded_amount: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    refunded_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=utcnow)
 
     business: Mapped["Business"] = relationship(back_populates="bookings")
@@ -99,5 +100,5 @@ class PaymentEvent(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     booking_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("bookings.id"))
     event_type: Mapped[str] = mapped_column(String, nullable=False)
-    raw_payload: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    raw_payload: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=utcnow)
