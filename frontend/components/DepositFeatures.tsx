@@ -30,7 +30,7 @@ export default function DepositFeatures() {
               </div>
             </div>
             
-            <div className="w-60 md:w-80 md:mt-2.5 border-t border-slate-100 pt-6">
+            <div className="w-60 md:w-80 md:mt-0.5 border-t border-slate-100 pt-6">
               <p className="text-3xl md:text-4xl font-extrabold text-slate-900">KES 10k+</p>
               <p className="text-sm md:text-base text-slate-500 font-medium">Secured Deposits This Month</p>
             </div>
