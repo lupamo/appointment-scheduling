@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Business } from "@/lib/api";
+import { FloatingField } from "./FormControls";
 
 export function ShareStep({ business }: { business: Business }) {
   const router = useRouter();
@@ -19,42 +20,68 @@ export function ShareStep({ business }: { business: Business }) {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl mb-1 text-white">You&apos;re live</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Share this link — customers pay a deposit to lock their slot, no back-and-forth.
-      </p>
+    <div className="w-full max-w-lg mx-auto">
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          Your booking page is ready
+        </h1>
+        <p className="text-sm text-gray-500">
+          Share this link with your clients—they can view services, pick a time, and pay a deposit instantly.
+        </p>
+      </div>
 
-      <div className="bg-gray-800 text-white rounded-sm p-5 mb-6">
-        <p className="text-xs text-gray-400 mb-1">Your booking link</p>
-        <p className="tabular text-sm text-white break-all mb-4">{link}</p>
-        <div className="border-t border-dashed border-gray-600 pt-4 flex gap-3">
-          <button
-            onClick={copy}
-            className="bg-orange-500 text-black px-4 py-2 rounded-sm text-sm hover:bg-orange-600 transition"
-          >
-            {copied ? "Copied" : "Copy link"}
-          </button>
+      <div className="p-6 md:p-8 border border-gray-200 rounded-3xl bg-white shadow-sm mb-6">
+        <FloatingField label="Your Booking Link">
+          <div className="relative flex items-center">
+            <input
+              readOnly
+              value={link}
+              className="w-full h-12 pr-24 pl-3.5 pt-1 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium text-gray-800 focus:outline-none select-all truncate"
+            />
+            <button
+              type="button"
+              onClick={copy}
+              className="absolute right-1.5 h-9 px-3.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl transition duration-150 shadow-xs"
+            >
+              {copied ? "Copied! " : "Copy"}
+            </button>
+          </div>
+        </FloatingField>
+
+        <div className="flex gap-3 mt-4">
           <a
             href={`/book/${business.slug}`}
             target="_blank"
             rel="noreferrer"
-            className="border border-gray-600 px-4 py-2 rounded-sm text-sm text-gray-300 hover:border-orange-500 transition"
+            className="w-full h-10 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium text-xs rounded-xl transition duration-150 flex items-center justify-center gap-1.5"
           >
-            View page
+            <span>Preview Page</span>
+            <svg
+              className="w-3.5 h-3.5 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
           </a>
         </div>
       </div>
 
       <button
         onClick={() => router.push(`/dashboard/${business.id}`)}
-        className="w-full bg-orange-500 text-black font-medium py-3 rounded-sm hover:bg-orange-600 transition mb-4"
+        className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-xl transition duration-150 shadow-sm mb-4"
       >
         Go to Dashboard
       </button>
 
-      <p className="text-gray-500 text-xs">
-        You can add more services or adjust your hours any time.
+      <p className="text-center text-xs text-gray-400">
+        You can update your services, prices, or working hours at any time from your dashboard.
       </p>
     </div>
   );

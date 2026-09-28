@@ -24,14 +24,11 @@ export default function OnboardPage() {
         // Check if user already has businesses
         const businesses = await api.listMyBusinesses();
         if (businesses.length > 0) {
-          // Redirect to dashboard if they have businesses
           router.push(`/dashboard/${businesses[0].id}`);
         } else {
-          // Show onboarding if they don't have businesses
           setShouldShowOnboard(true);
         }
       } catch (error) {
-        // If there's an error, still show onboarding
         setShouldShowOnboard(true);
       } finally {
         setIsLoading(false);

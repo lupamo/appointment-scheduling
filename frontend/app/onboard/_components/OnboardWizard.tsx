@@ -34,10 +34,11 @@ export function OnboardWizard() {
 	};
 
 	return (
-		<main className="min-h-screen px-6 py-10 md:py-16">
-			<div className="max-w-3xl mx-auto md:flex md:gap-16">
+		<main className="min-h-screen px-6 py-10 md:py-16 justify-center">
+			<div className="max-w-2xl mx-auto flex flex-col">
 				<StepNav step={step} completed={completed} onNavigate={goTo} />
-				<div className="flex-1 min-w-0">
+
+				<div className="w-full">
 					{step === "business" && (
 						<BusinessStep
 							onDone={handleBusinessCreated}

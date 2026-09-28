@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { api, ApiError, AvailabilityRule, Business, DAY_LABELS_FULL } from "@/lib/api";
-import { Field, inputClass } from "./FormControls";
+import { FloatingField, floatingInputClass } from "./FormControls";
 
 export function HoursStep({
   business,
@@ -62,87 +62,108 @@ export function HoursStep({
   }
 
   return (
-    <div>
-      <h1 className="text-2xl mb-1 text-white">When are you open?</h1>
-      <p className="text-gray-400 text-sm mb-8">
+    <div className="w-full max-w-lg mx-auto">
+      <h1 className="text-xl font-semibold text-gray-900 mb-2">
+        When are you open?
+      </h1>
+      <p className="text-sm text-gray-500 mb-6">
         Customers can only book within these hours.
       </p>
 
+      {/* Added Hours List */}
       {rules.length > 0 && (
-        <ul className="mb-8 divide-y border border-gray-700 rounded-sm overflow-hidden">
+        <div className="mb-6 border border-gray-200 rounded-2xl bg-white shadow-sm overflow-hidden divide-y divide-gray-100">
           {rules
             .slice()
             .sort((a, b) => a.day_of_week - b.day_of_week)
             .map((r) => (
-              <li key={r.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="text-white">{DAY_LABELS_FULL[r.day_of_week]}</span>
-                <span className="flex items-center gap-3">
-                  <span className="text-gray-400 tabular">
-                    {r.start_time.slice(0, 5)}–{r.end_time.slice(0, 5)}
+              <div key={r.id} className="flex items-center justify-between px-5 py-3.5 text-sm">
+                <span className="font-medium text-gray-900">
+                  {DAY_LABELS_FULL[r.day_of_week]}
+                </span>
+                <div className="flex items-center gap-4">
+                  <span className="text-xs font-medium text-gray-500 tabular-nums">
+                    {r.start_time.slice(0, 5)} – {r.end_time.slice(0, 5)}
                   </span>
                   <button
+                    type="button"
                     onClick={() => removeRule(r.id)}
-                    className="text-gray-500 hover:text-red-400 text-xs"
+                    className="text-xs font-medium text-red-500 hover:text-red-700 transition"
                     aria-label={`Remove ${DAY_LABELS_FULL[r.day_of_week]} hours`}
                   >
                     Remove
                   </button>
-                </span>
-              </li>
+                </div>
+              </div>
             ))}
-        </ul>
+        </div>
       )}
 
-      <form onSubmit={addHours} className="border border-gray-700 rounded-sm p-5 mb-6">
-        <span className="block text-sm text-gray-300 mb-2">Days</span>
-        <div className="flex flex-wrap gap-2 mb-5">
-          {DAY_LABELS_FULL.map((label, i) => (
-            <button
-              type="button"
-              key={i}
-              onClick={() => toggleDay(i)}
-              className={`px-3 py-1.5 rounded-sm text-sm border transition ${
-                selectedDays.has(i) ? "bg-orange-500 text-black border-orange-500" : "text-gray-300 border-gray-600"
-              }`}
-            >
-              {label.slice(0, 3)}
-            </button>
-          ))}
+      {/* Form Card */}
+      <form onSubmit={addHours} className="p-6 md:p-8 border border-gray-200 rounded-3xl bg-white shadow-sm mb-6">
+        <div className="mb-5">
+          <label className="block text-xs font-medium text-gray-600 mb-2.5">
+            Select Days
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {DAY_LABELS_FULL.map((label, i) => {
+              const active = selectedDays.has(i);
+              return (
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => toggleDay(i)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                    active
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {label.slice(0, 3)}
+                </button>
+              );
+            })}
+          </div>
         </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Opens">
+          <FloatingField label="Opens" required>
             <input
               type="time"
-              className={inputClass}
+              className={floatingInputClass}
               value={start}
               onChange={(e) => setStart(e.target.value)}
               required
             />
-          </Field>
-          <Field label="Closes">
+          </FloatingField>
+
+          <FloatingField label="Closes" required>
             <input
               type="time"
-              className={inputClass}
+              className={floatingInputClass}
               value={end}
               onChange={(e) => setEnd(e.target.value)}
               required
             />
-          </Field>
+          </FloatingField>
         </div>
+
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+
         <button
           type="submit"
           disabled={loading}
-          className="border border-gray-600 text-white px-4 py-2 rounded-sm text-sm hover:border-orange-500 transition disabled:opacity-50"
+          className="w-full mt-2 h-10 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium text-sm rounded-xl transition duration-150 disabled:opacity-50"
         >
-          {loading ? "Saving…" : "Add hours"}
+          {loading ? "Saving..." : "+ Add Hours"}
         </button>
       </form>
 
+      {/* Primary Action Button */}
       <button
         onClick={onDone}
         disabled={rules.length === 0}
-        className="bg-orange-500 text-black font-medium px-5 py-2.5 rounded-sm hover:bg-orange-600 transition disabled:opacity-30"
+        className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-xl transition duration-150 shadow-sm disabled:opacity-50"
       >
         Continue
       </button>
