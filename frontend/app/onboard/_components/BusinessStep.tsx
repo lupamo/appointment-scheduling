@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { api, ApiError, Business } from "@/lib/api";
-import { FloatingField, floatingInputClass } from "./FormControls";
+import { FloatingField, floatingInputClass } from "../../../components/FormControls";
 import { slugify } from "../_lib/slugify";
 
 export function BusinessStep({ onDone }: { onDone: (b: Business) => void }) {

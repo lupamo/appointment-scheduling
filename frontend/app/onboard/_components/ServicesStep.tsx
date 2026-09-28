@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { api, ApiError, Business, Service } from "@/lib/api";
-import { FloatingField, floatingInputClass } from "./FormControls";
+import { FloatingField, floatingInputClass } from "../../../components/FormControls";
 
 export function ServicesStep({
   business,

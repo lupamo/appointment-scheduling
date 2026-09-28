@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Business } from "@/lib/api";
-import { FloatingField } from "./FormControls";
+import { FloatingField } from "../../../components/FormControls";
 
 export function ShareStep({ business }: { business: Business }) {
   const router = useRouter();
