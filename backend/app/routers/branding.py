@@ -22,7 +22,7 @@ MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 async def _save_image(business_id: uuid.UUID, file: UploadFile, kind: str) -> str:
 	if file.content_type not in ALLOWED_CONTENT_TYPES:
 		raise HTTPException(
-			status_code=400
+			status_code=400,
 			detail="Image must be JPEG, PNG or WEBP",
 		)
 	contents = await file.read()

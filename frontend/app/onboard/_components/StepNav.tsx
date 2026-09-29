@@ -2,6 +2,11 @@
 
 import { Step, STEPS } from "../_lib/types"
 
+export interface StepDef<T = Step> {
+  key: T;
+  label: string;
+}
+
 export function StepNav({ step, completed, onNavigate,}: {
 	step:Step;
 	completed: Set<Step>
@@ -9,7 +14,7 @@ export function StepNav({ step, completed, onNavigate,}: {
 }) {
 	return (
 		<nav className="mb-8 w-full">
-			<div className="flex items-center justify-content-between p-1 bg-gray-100 rounded-2xl border border-gray-200">
+			<div className="flex items-center justify-between p-1 bg-gray-100 rounded-2xl border border-gray-200">
 				{STEPS.map((s, i) => {
 					const isCurrent = s.key === step;
 					const isDone = completed.has(s.key);

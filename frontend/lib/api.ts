@@ -12,6 +12,9 @@ export type Business = {
   payout_method: string;
   mpesa_shortcode: string | null;
   payout_phone: string | null;
+  banner_url: string | null;
+  profile_image_url: string | null;
+  bio: string | null;
   created_at: string;
 };
 
@@ -20,6 +23,9 @@ export type BusinessPublic = {
   id: string;
   name: string;
   slug: string;
+  banner_url: string | null;
+  profile_image_url: string | null;
+  bio: string | null;
 };
 
 export type Service = {
@@ -65,10 +71,31 @@ class ApiError extends Error {
   }
 }
 
+async function uploadFile<T>(path: string, file: File): Promise<T> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      // Deliberately no Content-Type here — the browser sets
+      // multipart/form-data with the correct boundary itself. Setting it
+      // manually breaks the upload.
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(typeof body.detail === "string" ? body.detail : "Upload failed", res.status);
+  }
+  return res.json();
+}
+
 interface ValidationErrorDetail {
-	msg: string;
-	loc?: (string | number)[];
-	type?: string;
+  msg: string;
+  loc?: (string | number)[];
+  type?: string;
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -122,23 +149,21 @@ export const api = {
 
   listMyBusinesses: () => request<Business[]>("/businesses/mine"),
 
-  updateBusiness: (
-    businessId: string,
-    payload: {
-      name: string;
-      phone: string;
-      slug: string;
-      payout_method: "phone" | "shortcode";
-      payout_phone?: string;
-      mpesa_shortcode?: string;
-    }
-  ) => request<Business>(`/businesses/${businessId}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  }),
+  // --- Branding ---
+  uploadBanner: (businessId: string, file: File) =>
+    uploadFile<Business>(`/businesses/${businessId}/branding/banner`, file),
+
+  uploadProfileImage: (businessId: string, file: File) =>
+    uploadFile<Business>(`/businesses/${businessId}/branding/profile-image`, file),
+
+  updateBio: (businessId: string, bio: string) =>
+    request<Business>(`/businesses/${businessId}/branding/bio`, {
+      method: "PATCH",
+      body: JSON.stringify({ bio }),
+    }),
 
   // --- Business (public) ---
-  getBusinessBySlug: (slug: string) => request<Business>(`/businesses/${slug}`),
+  getBusinessBySlug: (slug: string) => request<BusinessPublic>(`/businesses/${slug}`),
 
   // --- Services ---
   createService: (
@@ -151,9 +176,6 @@ export const api = {
     }),
 
   listServices: (businessId: string) => request<Service[]>(`/businesses/${businessId}/services`),
-
-  deleteService: (businessId: string, serviceId: string) =>
-    request<void>(`/businesses/${businessId}/services/${serviceId}`, { method: "DELETE" }),
 
   // --- Availability rules (owner mutates, public reads) ---
   createAvailabilityRule: (
