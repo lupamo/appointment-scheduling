@@ -1,8 +1,14 @@
-export type Step = "business" | "services" | "hours" | "share";
+export type Step = "business" | "branding" | "services" | "hours" | "share";
 
-export const STEPS: { key: Step; label: string }[] = [
-	{ key: "business", label: "Business" },
-	{ key: "services", label: "Services" },
-	{ key: "hours", label: "Hours" },
-	{ key: "share", label: "Share Link" },
-]
+export interface StepDef {
+  key: Step;
+  label: string;
+}
+
+export const STEPS: StepDef[] = [
+  { key: "business", label: "Business" },
+  { key: "branding", label: "Branding" },
+  { key: "services", label: "Services" },
+  { key: "hours", label: "Hours" },
+  { key: "share", label: "Share link" },
+];

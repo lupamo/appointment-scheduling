@@ -1,24 +1,22 @@
 "use client"
 
-import { Step, STEPS } from "../_lib/types"
+import { Step, StepDef } from "../_lib/types"
 
-export interface StepDef<T = Step> {
-  key: T;
-  label: string;
-}
-
-export function StepNav({ step, completed, onNavigate,}: {
-	step:Step;
+interface StepNavProps {
+	steps: StepDef[],
+	current: Step;
 	completed: Set<Step>
 	onNavigate: (s: Step) => void;
-}) {
+}
+
+export function StepNav({ steps, current, completed, onNavigate,}: StepNavProps) {
 	return (
 		<nav className="mb-8 w-full">
 			<div className="flex items-center justify-between p-1 bg-gray-100 rounded-2xl border border-gray-200">
-				{STEPS.map((s, i) => {
-					const isCurrent = s.key === step;
+				{steps.map((s, i) => {
+					const isCurrent = s.key === current;
 					const isDone = completed.has(s.key);
-					const reachable = isDone || isCurrent || (i > 0 && completed.has(STEPS[i - 1].key));
+					const reachable = isDone || isCurrent || (i > 0 && completed.has(steps[i - 1].key));
 
 					return (
 						<button

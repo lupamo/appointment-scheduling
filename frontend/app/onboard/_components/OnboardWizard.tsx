@@ -4,22 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, Business, Service, AvailabilityRule } from "@/lib/api";
 import { getToken, clearToken } from "@/lib/auth";
-import { StepNav, StepDef } from "../_components/StepNav";
+import { Step, STEPS } from "../_lib/types";
+import { StepNav } from "../_components/StepNav";
 import BusinessStep from "./BusinessStep";
 import BrandingStep from "./BrandingStep";
 import HoursStep from "./HoursStep";
 import { ServicesStep } from "./ServicesStep";
 import { ShareStep } from "./ShareStep";
-
-type Step = "business" | "branding" | "services" | "hours" | "share";
-
-const STEPS: StepDef<Step>[] = [
-  { key: "business", label: "Business" },
-  { key: "branding", label: "Branding" },
-  { key: "services", label: "Services" },
-  { key: "hours", label: "Hours" },
-  { key: "share", label: "Share link" },
-];
 
 type AuthState = "checking" | "authed" | "rejected";
 
