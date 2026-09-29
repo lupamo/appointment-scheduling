@@ -15,7 +15,7 @@ router = APIRouter(prefix="/businesses/{business_id}/branding", tags=["branding"
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-ALLOWED_CONTENT_TYPES = {"images/jpeg": "jpg", "images/png": "png", "images/webp": "webp"}
+ALLOWED_CONTENT_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 
 
@@ -27,7 +27,7 @@ async def _save_image(business_id: uuid.UUID, file: UploadFile, kind: str) -> st
 		)
 	contents = await file.read()
 	if len(contents) > MAX_UPLOAD_BYTES:
-		raise HTTPException(status_code=400, detail="Imagemust be under 5MB")
+		raise HTTPException(status_code=400, detail="Image must be under 5MB")
 	if len(contents) == 0:
 		raise HTTPException(status_code=400, detail="Empty File")
 

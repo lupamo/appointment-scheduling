@@ -6,15 +6,15 @@ import { api, Business, Service, AvailabilityRule } from "@/lib/api";
 import { getToken, clearToken } from "@/lib/auth";
 import { Step, STEPS } from "../_lib/types";
 import { StepNav } from "../_components/StepNav";
-import BusinessStep from "./BusinessStep";
-import BrandingStep from "./BrandingStep";
-import HoursStep from "./HoursStep";
+import { BusinessStep } from "./BusinessStep";
+import { BrandingStep } from "./BrandingStep";
+import { HoursStep } from "./HoursStep";
 import { ServicesStep } from "./ServicesStep";
 import { ShareStep } from "./ShareStep";
 
 type AuthState = "checking" | "authed" | "rejected";
 
-export default function OnboardWizard() {
+export function OnboardWizard() {
   const router = useRouter();
   const [authState, setAuthState] = useState<AuthState>("checking");
 
@@ -55,9 +55,9 @@ export default function OnboardWizard() {
 
   if (authState !== "authed") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex items-center gap-2.5 text-gray-500 text-sm font-medium">
-          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <main className="min-h-screen flex items-center justify-center bg-gray-50" suppressHydrationWarning>
+        <div className="flex items-center gap-2.5 text-gray-500 text-sm font-medium" suppressHydrationWarning>
+          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" suppressHydrationWarning />
           <span>
             {authState === "checking"
               ? "Checking your session…"
@@ -69,10 +69,10 @@ export default function OnboardWizard() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-10 md:py-16">
-      <div className="max-w-4xl mx-auto md:flex md:gap-12 lg:gap-16 items-start">
+    <main className="min-h-screen bg-gray-50 px-6 py-10 md:py-16" suppressHydrationWarning>
+      <div className="max-w-4xl mx-auto md:flex md:gap-12 lg:gap-16 items-start" suppressHydrationWarning>
         {/* Step Navigation Sidebar */}
-        <aside className="w-full md:w-56 shrink-0 mb-8 md:mb-0 sticky top-10">
+        <aside className="w-full md:w-56 shrink-0 mb-8 md:mb-0 sticky top-10" suppressHydrationWarning>
           <StepNav
             steps={STEPS}
             current={step}
@@ -82,7 +82,7 @@ export default function OnboardWizard() {
         </aside>
 
         {/* Dynamic Wizard Step Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0" suppressHydrationWarning>
           {step === "business" && (
             <BusinessStep
               onDone={(b) => {

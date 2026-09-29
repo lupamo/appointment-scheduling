@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { api, ApiError, AvailabilityRule, Business, DAY_LABELS_FULL } from "@/lib/api";
 import { FloatingField, floatingInputClass } from "../../../components/FormControls";
 
-export default function HoursStep({
+export function HoursStep({
   business,
   rules,
   setRules,

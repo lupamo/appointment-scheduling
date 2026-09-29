@@ -5,7 +5,7 @@ import { api, ApiError, Business } from "@/lib/api";
 import { FloatingField, floatingInputClass } from "../../../components/FormControls";
 import { slugify } from "../_lib/slugify";
 
-export default function BusinessStep({ onDone }: { onDone: (b: Business) => void }) {
+export function BusinessStep({ onDone }: { onDone: (b: Business) => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [slug, setSlug] = useState("");

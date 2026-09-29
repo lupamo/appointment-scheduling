@@ -104,7 +104,7 @@ function ImageUploadSlot({
   );
 }
 
-export default function BrandingStep({
+export function BrandingStep({
   business,
   setBusiness,
   onDone,

@@ -59,18 +59,27 @@ class BusinessOut(BaseModel):
 	payout_method: str
 	mpesa_shortcode: Optional[str] = None
 	payout_phone: Optional[str] = None
+	banner_url: Optional[str] = None
+	profile_image_url: Optional[str] = None
+	bio: Optional[str] = None
 	created_at: datetime
 
 	class Config:
 		from_attributes = True
+
+class BioUpdate(BaseModel):
+	bio: str
 
 class BusinessPublicOut(BaseModel):
 	"""What the public pag gets no payout info, no ownerid"""
 	id: uuid.UUID
 	name: str
 	slug: str
+	banner_url: Optional[str] = None
+	profile_image_url: Optional[str] = None
+	bio: Optional[str] = None
 
-	class Config: 
+	class Config:
 		from_attributes = True
 
 
@@ -123,7 +132,7 @@ class BookingStatusOut(BaseModel):
 	status: str
 
 	class Config:
-		from_attribute = True
+		from_attributes = True
 
 class RescheduleRequest(BaseModel):
 	new_slot_start: datetime
